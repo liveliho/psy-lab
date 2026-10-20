@@ -1,0 +1,14 @@
+{
+  "name": "心理实验室 · 心理与性格测评",
+  "short_name": "心理实验室",
+  "description": "开源、纯前端、注重隐私的心理与性格测评",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#5856d6",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

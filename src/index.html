@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>心理实验室 · 心理与性格测评</title>
+  <meta name="description" content="开源、纯前端、注重隐私的心理测评网站：16 型人格、大五人格、I 人 E 人、依恋风格、职业兴趣、PHQ-9、GAD-7 等量表，以及心情日记与呼吸练习。">
+  <meta name="theme-color" content="#f2f2f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="心理实验室">
+  <meta property="og:title" content="心理实验室 · 心理与性格测评">
+  <meta property="og:description" content="I 人还是 E 人？16 型人格、大五人格、依恋风格……数据只保存在你的设备上。">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/app.css?v=__BUILD__">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <radialGradient id="faceShine" cx=".35" cy=".25" r=".85">
+        <stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+        <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000" stop-opacity=".12"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <header class="navbar" id="navbar">
+    <button class="nav-btn" id="navBack" aria-label="返回"></button>
+    <div class="nav-title" id="navTitle"></div>
+    <div class="nav-right" id="navRight"></div>
+  </header>
+
+  <main id="view" tabindex="-1">
+    <noscript><p style="padding:40px;text-align:center">请启用 JavaScript 以使用本站。</p></noscript>
+  </main>
+
+  <nav class="tabbar glass" id="tabbar" aria-label="主导航"></nav>
+  <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js?v=__BUILD__"></script>
+</body>
+</html>

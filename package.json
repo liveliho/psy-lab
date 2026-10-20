@@ -1,0 +1,13 @@
+{
+  "name": "psy-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "开源、纯前端、注重隐私的心理与性格测评网站",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs src 5173",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/build.mjs && node scripts/serve.mjs dist 4173"
+  },
+  "license": "MIT"
+}
