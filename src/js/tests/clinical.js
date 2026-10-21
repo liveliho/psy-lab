@@ -224,3 +224,64 @@ export const rses = {
     };
   },
 };
+
+// ---------- ASRS v1.1 成人 ADHD 自填量表（A 部分） ----------
+const ASRS_SCALE = [
+  { v: 0, l: '从不' },
+  { v: 1, l: '很少' },
+  { v: 2, l: '有时' },
+  { v: 3, l: '经常' },
+  { v: 4, l: '非常频繁' },
+];
+const asrsItems = [
+  { t: '当一件事最有挑战的部分完成后，你有多常难以把剩下的细节收尾？', k: 'I', cut: 2 },
+  { t: '当需要做一件需要条理的事情时，你有多常难以把它安排得井井有条？', k: 'I', cut: 2 },
+  { t: '你有多常难以记住约会或必须要做的事情？', k: 'I', cut: 2 },
+  { t: '当遇到一件需要花很多心思的任务时，你有多常回避或拖延开始？', k: 'I', cut: 3 },
+  { t: '当需要长时间坐着时，你有多常手脚不停地动或扭来扭去？', k: 'H', cut: 3 },
+  { t: '你有多常像被马达驱动一样，感到过度活跃、停不下来？', k: 'H', cut: 3 },
+];
+
+export const asrs = {
+  id: 'asrs',
+  name: '成人 ADHD 自评 ASRS',
+  short: 'ADHD 筛查',
+  icon: 'zap',
+  tint: '#ff9f0a',
+  category: 'mood',
+  minutes: 1,
+  sensitive: true,
+  intro: '注意缺陷多动障碍（ADHD）并不只发生在儿童身上，约 2.5%–3% 的成年人也受其影响，表现为注意力难以维持、做事缺乏条理、坐立不安等。ASRS v1.1 是世界卫生组织与哈佛大学合作编制的筛查工具，其中 A 部分的 6 题筛查效果最好。请回想过去 6 个月的情况。',
+  prompt: '过去 6 个月里——',
+  scale: ASRS_SCALE,
+  scaleStyle: 'list',
+  reference: 'Kessler, R. C. et al. (2005). The World Health Organization Adult ADHD Self-Report Scale (ASRS). Psychol Med. 中文为意译。筛查阳性不等于确诊，ADHD 需由精神科医生综合评估。',
+  items: asrsItems,
+  score(answers) {
+    const hits = asrsItems.filter((it, i) => answers[i] >= it.cut).length;
+    const sum = total(this, answers);
+    const pos = hits >= 4;
+    const inatt = answers.slice(0, 4).reduce((a, v) => a + v, 0), hyper = answers.slice(4).reduce((a, v) => a + v, 0);
+    const text = pos
+      ? '你的回答中有 ' + hits + ' 项达到了筛查标准，提示你的表现与成人 ADHD 的特征较为一致。这不是诊断——焦虑、抑郁、睡眠不足也可能带来类似的表现。如果这些困扰长期影响到你的学习、工作或生活，建议到精神科或心理科做进一步评估。'
+      : hits >= 2
+        ? '你有 ' + hits + ' 项达到筛查标准，尚未达到阳性界限。每个人都会有分心、拖延的时候，但如果它们明显影响了生活，也值得关注。'
+        : '你的回答没有显示明显的 ADHD 特征。偶尔分心、拖延是正常现象。';
+    return {
+      headline: pos ? '筛查阳性' : '筛查阴性',
+      title: hits + ' / 6 项达到筛查标准',
+      icon: pos ? 'alert' : 'check',
+      summary: text,
+      line: 'ASRS ' + hits + '/6 · ' + (pos ? '筛查阳性' : '筛查阴性'),
+      viz: [
+        { type: 'gauge', value: hits, max: 6, color: pos ? C.orange : hits >= 2 ? C.yellow : C.green, label: pos ? '筛查阳性' : '筛查阴性' },
+        { type: 'bars', rows: [{ label: '注意力与条理', value: inatt, max: 16 }, { label: '多动与坐立不安', value: hyper, max: 8 }, { label: '总分', value: sum, max: 24 }] },
+      ],
+      sections: [
+        { title: '结果说明', text },
+        { title: '计分方式', text: '前 3 题选择"有时"及以上、后 3 题选择"经常"及以上即计为 1 项。6 项中有 4 项及以上时，筛查结果为阳性。' },
+        { title: '无论结果如何，这些方法都有帮助', list: ['把大任务拆成 15 分钟就能完成的小步骤', '使用外部提醒：日历、闹钟、便利贴，而不是依赖记忆', '把手机放远一点，用番茄钟保护专注时间', '规律运动对注意力的改善效果被大量研究证实'] },
+      ],
+    };
+  },
+};

@@ -6,7 +6,8 @@ import { $, $$, toast, esc } from './util.js';
 import { nav } from './nav.js';
 import { homeView } from './views/home.js';
 import { testsView, introView, quizView, resultRoute, sharedRoute } from './views/tests.js';
-import { toolsView, moodView, breatheView, groundView, bubblesView, articleView } from './views/tools.js';
+import { toolsView, moodView, breatheView, groundView, pmrView, bubblesView, articleView } from './views/tools.js';
+import { TOYS } from './views/play.js';
 import { stroopView, reactionView, spanView } from './views/lab.js';
 import { meView, badgesView, historyView, helpView, aboutView } from './views/me.js';
 import { learnView, psyView, expView, timelineView, triviaView } from './views/learn.js';
@@ -28,6 +29,8 @@ const ROUTES = {
   breathe: breatheView,
   ground: groundView,
   bubbles: bubblesView,
+  pmr: pmrView,
+  play: ([kind]) => (Object.hasOwn(TOYS, kind) ? TOYS[kind]() : null),
   article: articleView,
   learn: learnView,
   psy: psyView,

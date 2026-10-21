@@ -39,7 +39,7 @@ export function homeView() {
       </div>
 
       ${sectionH('热门测评', 'grid', ['全部', '#/tests'])}
-      <div class="grid2 wide3 stagger">${['mbti', 'bigfive', 'hsp', 'love', 'enneagram', 'eq'].map((id) => testCard(getTest(id))).join('')}</div>
+      <div class="grid2 wide3 stagger">${['mbti', 'bigfive', 'darktriad', 'hsp', 'love', 'pleaser', 'enneagram', 'chrono', 'anchors'].map((id) => testCard(getTest(id))).join('')}</div>
 
       ${sectionH('认知小实验', 'brain', ['更多', '#/tools'])}
       <div class="grid2">
@@ -50,7 +50,9 @@ export function homeView() {
       ${sectionH('放松一下', 'leaf', ['更多', '#/tools'])}
       <div class="grid2">
         ${toolCard('#/breathe', 'wind', '#40c8e0', '呼吸练习', '1 分钟平静下来')}
-        ${toolCard('#/bubbles', 'bubbles', '#64d2ff', '解压泡泡纸', '捏到停不下来')}
+        ${toolCard('#/play/muyu', 'muyu', '#b8692c', '电子木鱼', '功德 +1')}
+        ${toolCard('#/play/sand', 'waves', '#c7a26b', '禅意沙盘', '数字枯山水')}
+        ${toolCard('#/play/noise', 'headphones', '#30b0c7', '白噪音', '雨声与篝火')}
       </div>
 
       ${recent.length ? `${sectionH('最近结果', 'clock', ['全部', '#/history'])}<div class="card glass list">${recent.map(historyItem).join('')}</div>` : ''}
