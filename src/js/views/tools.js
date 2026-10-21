@@ -1,5 +1,6 @@
 import { ARTICLES, MOODS, MOOD_TAGS, EMOTIONS } from '../content.js';
 import { moods, stats, reads, settings } from '../store.js';
+import { audio, noiseBurst } from '../audio.js';
 import { moodChart, emotionWheel } from '../charts.js';
 import { icon, appIcon, moodFace } from '../icons.js';
 import { esc, $, $$, fmtDate, toast, confirmSheet } from '../util.js';
@@ -10,13 +11,25 @@ import { nav } from '../nav.js';
 export function toolsView() {
   return {
     title: '工具', tab: 3,
-    html: `<h1 class="large-title">工具</h1><p class="large-sub">照顾情绪的小练习，和好玩的心理学实验</p>
+    html: `<h1 class="large-title">工具</h1><p class="large-sub">照顾情绪的小练习、解压玩具，和好玩的心理学实验</p>
       ${sectionH('情绪照顾', 'heart')}
       <div class="stack stagger">
         ${toolCard('#/mood', 'smile', '#ff9500', '心情日记', '情绪打卡 + 情绪轮，看见自己的变化趋势')}
         ${toolCard('#/breathe', 'wind', '#40c8e0', '呼吸练习', '盒式呼吸 · 4-7-8 呼吸 · 放松呼吸')}
+        ${toolCard('#/pmr', 'body', '#34c759', '渐进式肌肉放松', '先收紧再放松，跟着引导释放身体里的紧张')}
         ${toolCard('#/ground', 'anchor', '#af52de', '5-4-3-2-1 着陆练习', '焦虑或恐慌时，用五感把自己带回当下')}
-        ${toolCard('#/bubbles', 'bubbles', '#64d2ff', '解压泡泡纸', '无限续杯的泡泡纸，还有"啵"的声音')}
+        ${toolCard('#/play/shred', 'scissors', '#5e5ce6', '烦恼粉碎机', '写下烦恼，然后亲手粉碎或吹散它')}
+        ${toolCard('#/play/noise', 'headphones', '#30b0c7', '白噪音', '雨声 · 海浪 · 篝火 · 溪流，自由混合')}
+      </div>
+      ${sectionH('解压玩具', 'gamepad')}
+      <div class="grid2 wide3 stagger">
+        ${toolCard('#/play/muyu', 'muyu', '#b8692c', '电子木鱼', '功德 +1')}
+        ${toolCard('#/bubbles', 'bubbles', '#64d2ff', '泡泡纸', '捏到停不下来')}
+        ${toolCard('#/play/spinner', 'spinner', '#ff9500', '指尖陀螺', '看看能转多久')}
+        ${toolCard('#/play/slime', 'blob', '#45d6b8', '果冻史莱姆', 'Q 弹可拉扯')}
+        ${toolCard('#/play/sand', 'waves', '#c7a26b', '禅意沙盘', '数字枯山水')}
+        ${toolCard('#/play/mandala', 'flower', '#bf5af2', '曼陀罗画板', '画一笔变对称')}
+        ${toolCard('#/play/chimes', 'bell', '#5856d6', '音乐涟漪', '随手弹出旋律')}
       </div>
       ${sectionH('认知实验室', 'brain')}
       <div class="stack stagger">
@@ -160,6 +173,65 @@ export function breatheView() {
   };
 }
 
+export function pmrView() {
+  const GROUPS = [
+    ['双手', '用力握紧双拳，感受手掌和手指的紧绷', '慢慢松开拳头，感受手心的温热和放松'],
+    ['手臂', '弯曲手肘，绷紧上臂的肌肉', '放下手臂，让它们沉沉地垂落'],
+    ['肩膀', '把肩膀用力耸向耳朵', '让肩膀沉下来，感觉重量从肩上卸下'],
+    ['额头', '用力皱起眉头，抬高眉毛', '舒展额头，让它变得平滑、松弛'],
+    ['眼睛和脸颊', '紧紧闭上眼睛，皱起鼻子', '放松眼周和脸颊，让面部柔软下来'],
+    ['下巴', '咬紧牙关，嘴角向两侧拉开', '松开牙齿，让下巴微微张开'],
+    ['胸和背', '深吸一口气，挺胸，肩胛骨向后夹紧', '慢慢呼气，让胸口和后背放松'],
+    ['腹部', '收紧腹部，像要迎接一记轻拳', '放开腹部，让呼吸自然地起伏'],
+    ['双腿和双脚', '伸直双腿，脚尖用力向上勾起', '放松双腿，让双脚完全落在地上'],
+  ];
+  const TENSE = 5, RELAX = 10;
+  let gi = -1, phase = '', left = 0, timer = null;
+  return {
+    title: '肌肉放松', tab: 3, back: '#/tools',
+    html: `<h1 class="large-title">渐进式肌肉放松</h1><p class="large-sub">由 Edmund Jacobson 于 1930 年代提出：依次收紧再放松全身肌肉，学会分辨"紧张"与"放松"的感觉。全程约 2.5 分钟。</p>
+      <div class="card glass lab-stage pmr-stage" id="pbox"></div>
+      <div class="row-btns" style="margin-top:14px"><button class="btn" id="pgo" style="background:#34c759"></button></div>`,
+    mount(root) {
+      const box = $('#pbox', root), btn = $('#pgo', root);
+      const dots = () => `<div class="ground-dots">${GROUPS.map((_, k) => `<i class="${k === gi ? 'on' : ''}"></i>`).join('')}</div>`;
+      const intro = () => {
+        gi = -1;
+        box.innerHTML = `${appIcon('body', '#34c759', 'lg')}<h2 style="font-size:22px">找一个舒服的姿势</h2><p class="hint">坐着或躺着都可以。每个部位收紧 ${TENSE} 秒、放松 ${RELAX} 秒。收紧时用七分力即可，不要引起疼痛。</p>`;
+        btn.innerHTML = `${icon('play')}开始`;
+      };
+      const draw = () => {
+        const [name, tense, relax] = GROUPS[gi];
+        const t = phase === 'tense';
+        box.innerHTML = `<div class="pmr-orb ${t ? 'tense' : ''}"></div>
+          <div class="small muted">${gi + 1} / ${GROUPS.length} · ${name}</div>
+          <h2 style="font-size:24px;margin-top:4px">${t ? '收紧' : '放松'} <span class="muted" style="font-variant-numeric:tabular-nums">${left}</span></h2>
+          <p class="hint">${t ? tense : relax}</p>${dots()}`;
+      };
+      const tick = () => {
+        left--;
+        if (left > 0) return draw();
+        if (phase === 'tense') { phase = 'relax'; left = RELAX; navigator.vibrate?.(20); return draw(); }
+        if (gi < GROUPS.length - 1) { gi++; phase = 'tense'; left = TENSE; navigator.vibrate?.([15, 60, 15]); return draw(); }
+        stop(true);
+      };
+      const start = () => { gi = 0; phase = 'tense'; left = TENSE; draw(); timer = setInterval(tick, 1000); btn.innerHTML = `${icon('x')}结束`; };
+      const stop = (done) => {
+        clearInterval(timer); timer = null;
+        if (done) {
+          stats.bump('pmrCount');
+          nav.checkBadges?.();
+          box.innerHTML = `${appIcon('sparkles', '#34c759', 'lg')}<h2 style="font-size:22px">做得很好</h2><p class="hint">花一点时间感受全身的放松。留意现在的身体和开始前有什么不同。</p>`;
+          btn.innerHTML = `${icon('refresh')}再来一次`;
+        } else intro();
+      };
+      btn.onclick = () => (timer ? stop(false) : start());
+      intro();
+      return () => clearInterval(timer);
+    },
+  };
+}
+
 export function groundView() {
   const steps = [
     { ic: 'leaf', h: '先停下来', p: '找一个舒服的姿势，慢慢地深呼吸三次。接下来我们用五种感官，把注意力带回此时此地。' },
@@ -195,28 +267,9 @@ export function groundView() {
 }
 
 /* ---------- 泡泡纸 ---------- */
-let audioCtx;
 function popSound() {
-  if (!settings.get().sound) return;
-  try {
-    audioCtx ??= new (window.AudioContext || window.webkitAudioContext)();
-    const t = audioCtx.currentTime;
-    const len = Math.floor(audioCtx.sampleRate * 0.05);
-    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf;
-    const bp = audioCtx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 900 + Math.random() * 900;
-    bp.Q.value = 1.2;
-    const g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.9, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
-    src.connect(bp).connect(g).connect(audioCtx.destination);
-    src.start(t);
-  } catch { /* 无音频支持 */ }
+  const ac = audio();
+  if (ac) noiseBurst(ac, { freq: 900 + Math.random() * 900 });
 }
 
 export function bubblesView() {
